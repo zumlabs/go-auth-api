@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	// load config
+	// load config (.env)
 	cfg := config.LoadConfig()
 
 	// connect database
@@ -33,13 +33,14 @@ func main() {
 
 	// ===== DEPENDENCY INJECTION =====
 	userRepo := repository.NewUserRepository(db)
-	authService := service.NewAuthService(userRepo)
+	authService := service.NewAuthService(userRepo, cfg.JWTSecret)
 	authHandler := handler.NewAuthHandler(authService)
 
 	// ===== ROUTES =====
 	auth := r.Group("/api/auth")
 	{
 		auth.POST("/register", authHandler.Register)
+		auth.POST("/login", authHandler.Login)
 	}
 
 	// run server
