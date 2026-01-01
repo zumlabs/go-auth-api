@@ -5,12 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zumlabs/go-auth-api/config"
+	"github.com/zumlabs/go-auth-api/internal/model"
 )
 
 func main() {
 	cfg := config.LoadConfig()
 	db := config.ConnectDatabase(cfg)
-	_ = db // dipakai nanti, biar tidak error
+
+	// auto create users table
+	db.AutoMigrate(&model.User{})
 
 	r := gin.Default()
 
