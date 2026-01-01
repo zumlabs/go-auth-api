@@ -6,13 +6,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/zumlabs/go-auth-api/config"
 	"github.com/zumlabs/go-auth-api/internal/handler"
+	"github.com/zumlabs/go-auth-api/internal/middleware"
 	"github.com/zumlabs/go-auth-api/internal/model"
 	"github.com/zumlabs/go-auth-api/internal/repository"
 	"github.com/zumlabs/go-auth-api/internal/service"
 )
 
 func main() {
-	// load config (.env)
+	// load config
 	cfg := config.LoadConfig()
 
 	// connect database
@@ -35,12 +36,20 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	authService := service.NewAuthService(userRepo, cfg.JWTSecret)
 	authHandler := handler.NewAuthHandler(authService)
+	userHandler := handler.NewUserHandler()
 
-	// ===== ROUTES =====
+	// ===== AUTH ROUTES =====
 	auth := r.Group("/api/auth")
 	{
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
+	}
+
+	// ===== PROTECTED ROUTES =====
+	user := r.Group("/api/user")
+	user.Use(middleware.JWTAuthMiddleware(cfg.JWTSecret))
+	{
+		user.GET("/me", userHandler.Me)
 	}
 
 	// run server
