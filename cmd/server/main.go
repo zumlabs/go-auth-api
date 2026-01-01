@@ -9,13 +9,14 @@ import (
 
 func main() {
 	cfg := config.LoadConfig()
+	db := config.ConnectDatabase(cfg)
+	_ = db // dipakai nanti, biar tidak error
 
 	r := gin.Default()
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status":  "ok",
-			"message": "Go Auth API is running",
+			"status": "ok",
 		})
 	})
 
